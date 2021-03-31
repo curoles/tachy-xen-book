@@ -38,3 +38,21 @@ the hypervisor is practically unnoticeable.
   bitness and endianess.
 * TODO IOMMU
 * TODO Need to use QEMU for full system virtualization FVM
+
+=== CPU and system support for virtualization
+
+.Required functinality
+* Ability to bind a virtual machine to a specific CPU on the host system.
+  It helps to solve performance problems of a virtual machine under heavy load.
+* No limitation for the size of virtual address space available for OS kernels
+  running inside virtual machine.
+* Each guest OS may create high network traffic, multiple guests can easily
+  overload the capabilities of a single network interface.
+  The system must support multiple network interfaces with high bandwidth.
+* The system must support high IO traffic as guests may run storage intensive
+  applications, such as database applications.
+* The system must satisfy all requirements of Trusted Computing for the virtualized
+  environment when multiple operating systems are simultaneously running on
+  a single platform (with a single TPM device).
+  Including the secure migration of the TPM state from one physical system
+  to another when domainU guests are migrated from one system to another.
