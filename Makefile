@@ -5,7 +5,7 @@ MASTER_ADOC := $(SRC_DIR)/tachy-xen-book.adoc
 
 SRCs := $(MASTER_ADOC) $(SRC_DIR)/intro/intro.adoc
 
-#ADIAGRAM := -r asciidoctor-diagram
+ADIAGRAM := -r asciidoctor-diagram
 
 
 .PHONY: outputs pdf_output html_output docbook_output
@@ -38,6 +38,16 @@ endef
 help:
 	@: $(info $(helpmsg))
 
+
+ATRIL := $(shell command -v atril 2> /dev/null)
+EVINCE := $(shell command -v evince 2> /dev/null)
+
 .PHONY: view-pdf
 view-pdf:
+ifdef ATRIL
 	@atril $(OUT_DIR)/pdf/tachy-xen-book.pdf &
+else ifdef EVINCE
+	@evince $(OUT_DIR)/pdf/tachy-xen-book.pdf &
+else
+	@gnome-open $(OUT_DIR)/pdf/tachy-xen-book.pdf &
+endif

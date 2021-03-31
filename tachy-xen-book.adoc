@@ -1,4 +1,4 @@
-= Tachyxx Xen Internals
+= Tachyxx Xen Hypervisor: Internals and CPU support
 :author: Igor Lesik
 :email: ilesik@tachyxx.com
 :revnumber: v0.1

@@ -5,3 +5,8 @@
 
 [preface]
 == Introduction
+
+=== Who should read this book
+
+The primary audience of this book is software engineers who are interested
+in Xen internals or intend to port Xen to a new CPU architecture.

@@ -1,1 +1,40 @@
-== CH1
+== TODO Name of chapter
+
+=== Power of Name
+
+If you are a fan of fantasy books, you know that a name has power.
+Let us find out what name Xen means.
+Xen was originally developed as virtual machine monitor for XenoServers project.
+Word _xeno_ (/'zeno) originates from Greek word xenos,
+meaning "alien, stranger, foreigner".
+Therefore the name Xen is hinting at advanced alien technology.
+
+Word Xen is often combined with word Hypervisor, because Xen is a hypervisor.
+OS kernel runs at elevated privilege level compare to applications
+and called _supervisor_ because it manages the applications.
+When OS kernel runs under control of Xen virtual machine monitor,
+the kernal is supervised by the Xen.
+The fact that Xen runs at higher privilege level than "supervisor mode" OS code
+and supervises it is the origin of the term "hypervisor".
+
+=== History of Pitfalls due to CPU arhitecture
+
+While designing a new CPU the architects should be aware of the problems other CPU architectures
+had or still have to support virtualization by Xen.
+The understading of past and existing problems is crutial in designing
+a CPU that can support virtualization efficiently, when overhead of running
+the hypervisor is practically unnoticeable.
+
+* One well known problem with x86 was that some privileged instructions did not
+  trap when they were executed with unsufficient privileges failing silently.
+  Some virtualizers monitored instruction stream and patched those misbehaving
+  instructions, practically performing binary translation, which caused
+  significant degradation of performance.
+* In case of paravirtualization, an absense of a special instructions in the ISA
+  to be used for fast hypecall to the hypervisor is very critical for the performance.
+* It used to be on x86 that booting 32-bit domain0 dictated all other domainU kernels
+  to be 32-bit, similar for 64-bit domain0.
+  New CPU architecture should allow different meaningful combinations of kernels, including
+  bitness and endianess.
+* TODO IOMMU
+* TODO Need to use QEMU for full system virtualization FVM
