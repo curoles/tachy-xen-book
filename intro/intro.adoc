@@ -1,0 +1,7 @@
+[colophon]
+== Copyright
+
+(C) 2021 by Igor Lesik.
+
+[preface]
+== Introduction

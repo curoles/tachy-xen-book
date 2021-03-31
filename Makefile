@@ -37,3 +37,7 @@ endef
 .PHONY: help
 help:
 	@: $(info $(helpmsg))
+
+.PHONY: view-pdf
+view-pdf:
+	@atril $(OUT_DIR)/pdf/tachy-xen-book.pdf &
