@@ -10,7 +10,7 @@ ADIAGRAM := -r asciidoctor-diagram
 
 .PHONY: outputs pdf_output html_output docbook_output
 
-outputs: pdf_output html_output
+outputs: pdf_output html_output docbook_output
 
 pdf_output: $(SRCs)
 	asciidoctor-pdf -a icons -a allow-uri-read -d book $(ADIAGRAM) -D $(OUT_DIR)/pdf $(MASTER_ADOC)

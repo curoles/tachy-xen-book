@@ -1,4 +1,4 @@
-== TODO Name of chapter
+== Zen of Xen
 
 === Power of Name
 
@@ -9,13 +9,92 @@ Word _xeno_ (/'zeno) originates from Greek word xenos,
 meaning "alien, stranger, foreigner".
 Therefore the name Xen is hinting at advanced alien technology.
 
-Word Xen is often combined with word Hypervisor, because Xen is a hypervisor.
+Word Xen is often combined with word "hypervisor",
+because Xen virtual machine monitor is a hypervisor.
+Prefix _hyper_ here means "super-duper". 
 OS kernel runs at elevated privilege level compare to applications
-and called _supervisor_ because it manages the applications.
+and is called _supervisor_ because it a) manages the applications
+and b) has more priviledges than application code.
 When OS kernel runs under control of Xen virtual machine monitor,
-the kernal is supervised by the Xen.
+the kernal is supervised by the Xen, and Xen has higher privilege level.
 The fact that Xen runs at higher privilege level than "supervisor mode" OS code
 and supervises it is the origin of the term "hypervisor".
+
+Sometimes word Xen is used just for the hypervisor,
+other times it is used for all the parts involved in to
+the virtualization solution:
+hypervisor, OS kernel virtualization modifications,
+drivers for paravirtualization, tools and etc.
+
+=== What Is Virtualization?
+
+Xen virtualizes the computing system as whole,
+including CPU, memory, storage devices, network resources, I/O devices and etc.
+The virtualization in this case is the act of creating a virtual
+(rather than actual) version of a computer hardware platform.
+Normally, in order to get most benifits from the virtualization,
+more than one virtual hardware platform is created.
+The case when a single virtual platform is created
+can be considered an emulation (and it is also has its usages).
+
+=== Hypervisor-based approach to virtualization
+
+There are many different approaches to virtualization,
+we are not going to discuss and compare them here;
+if you are interested in this topic,
+there are many available books and Internet resources that explain
+different virtualization techniques.
+Xen is using hypervisor-based approach, where a hypervisor
+is a low-level virtual machine monitor that runs directly
+on the physical hardware and loads first during the machine
+boot process.
+The hypervisor runs virtual machines (VM).
+Virtual machine runs operating system (which runs applications).
+Normally, an operating system is compiled for the same instruction set
+as the physical machine on which the virtual systems are running.
+
+[ditaa]
+....
++------------------------------------------------+
+|                                                |
+| +--------------------------------------------+ |
+| |                                            | |
+| | +----------+  +----------+  +----------+   | |
+| | | Virtual  |  | Virtual  |  | Virtual  |   | |
+| | | Machine  |  | Machine  |  | Machine  |   | |
+| | |  with    |  |  with    |  |  with    |   | |
+| | | Admini-  |  | Guest OS |  | Guest OS |   | |
+| | | strative |  |          |  |          |   | |
+| | | Control  |  +----------+  +----------+   | |
+| | |          |     domU          domU        | |
+| | |          |                               | |
+| | +----------+                               | |
+| |    dom0                                    | |
+| |                 Hypervisor                 | |
+| | cPNK                                       | |
+| +--------------------------------------------+ |
+|                                                |
+|                    Hardware                    |
+| cBLU                                           |
++------------------------------------------------+
+....
+
+Xen terminology defines a concept of "Xen domain", which is
+a specific instance of a Xen virtual machine.
+Xen supports two basic types of domains:
+
+* Xen architecture has one domain with a specially privileged
+  Xen-modified kernel that is used to manage, monitor, and administer all
+  other Xen virtual machines. This specially priviliged domain and
+  kernel is known as _domain0_ or _dom0_.
+  This kernel communicates with the hypervisor.
+* Other domains are known as guest domains, unprivileged domains,
+  _domainU_ or _domU_.
+  It is _dom0_ that starts any _domU_.
+
+=== CPU Virtualization
+
+=== I/O Virtualization
 
 === History of Pitfalls due to CPU arhitecture
 
