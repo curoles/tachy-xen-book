@@ -94,9 +94,90 @@ Xen supports two basic types of domains:
 
 === CPU Virtualization
 
+For a CPU to be completely virtualized, core running in one domain must not
+affect code running in another domains.
+Privileged instructions have direct access to CPU resources and can access
+memory by physical address. These instructions present the biggest
+problem for virtualization, as they can change CPU state and affect
+all code running on that CPU.
+Popek and Goldberg <<popek>> in their 1974 paper
+"Formal Requirements for Virtualizable Third Generation Archotectures."
+devide critical for virtualization instructions into three categories:
+
+* Privileged instructions that execute in a privilege mode.
+  They have to trap if executed outside of their privilege mode.
+  In a virtualized system, the trap handler makes sure that
+  the effect of the instruction is contained inside the domain.
+* Control sensitive instructions that change global CPU state
+  by communicating with devices, changing global configuration registers,
+  updating virtual to physical memory mappings.
+* Behavior sensitive instructions that behave differently depending
+  on the configuration.
+
+In order for an architecture to be virtualizable, all control sensitive
+instructions must be trappable privileged instructions.
+
+=== Memory Virtualization
+
+Memory virtualization is relatively straightforward.
+Each physical memory page is assigned to one domain,
+this way physical memory is spit between domains;
+the difficulty is
+due to the fact that OS kernel virtual-to-physical translation
+operates with interemidiate "psedo" physical address that needs to be
+translated into "real" physical address, called machine address.
+Every priviliged instruction that accesses physical memory or
+changes virtual to physical mapping must be trapped.
+
+.Memory virtualization performance critical HW support
+* HW support for 2 levels page-tables walk: virtual-to-physical
+  and physical-to-machine.
+* Tagged TLB that allows flushing per domain, without flushing all TLB entries.
+
 === I/O Virtualization
 
-=== History of Pitfalls due to CPU arhitecture
+With devices, other than CPU and memory, there are two main reasons
+why virtualization is difficult:
+
+* Most devices are not designed with virtualization in mind.
+* For some devices it is not obvious what virtualization means for them
+  or how these devices can support virtualization.
+
+For example, most of the time it is easier to assign keyboard, mouse
+and display to one domain, instead of sharing it.
+On other hand, storage devices and network devices most of the time
+are shared.
+
+Storage devices are usually virtualized similar to memory by partitioning
+the physical space between domains.
+
+One well known problem is when a device uses DMA without
+support from _Input/Output Memory Management Unit_ (IOMMU).
+When unmodified OS is unaware it is running not on actual hardware
+platform but on virtual platform, DMA will use hypervisor-provided
+physical address instead of machine address.
+
+Here is a list of suggestions for choosing existing devices for your system
+or when new device is to be designed:
+
+* Make sure the device has _Input/Output Memory Management Unit_ (IOMMU).
+* Make sure the whole device state can be saved and later restored.
+* For security critical devices, make sure there is a way to protect
+  information in case multiple domains share this device.
+
+=== Paravirtualization
+
+TODO
+
+=== Hardware-Assisted Virtualization
+
+TODO
+
+=== Types of virtualization
+
+TODO check Xen wiki, 5 types total?
+
+=== History Of Problems with Virtualization
 
 While designing a new CPU the architects should be aware of the problems other CPU architectures
 had or still have to support virtualization by Xen.
@@ -109,16 +190,18 @@ the hypervisor is practically unnoticeable.
   Some virtualizers monitored instruction stream and patched those misbehaving
   instructions, practically performing binary translation, which caused
   significant degradation of performance.
+* In past many architechtures did not have a protection level designed specifically
+  for a hypervisor even when they have several protection levels.
 * In case of paravirtualization, an absense of a special instructions in the ISA
   to be used for fast hypecall to the hypervisor is very critical for the performance.
 * It used to be on x86 that booting 32-bit domain0 dictated all other domainU kernels
   to be 32-bit, similar for 64-bit domain0.
   New CPU architecture should allow different meaningful combinations of kernels, including
   bitness and endianess.
-* TODO IOMMU
+* TODO DMA, absence of IOMMU
 * TODO Need to use QEMU for full system virtualization FVM
 
-=== CPU and system support for virtualization
+=== CPU And System Support For Virtualization
 
 .Required functinality
 * Ability to bind a virtual machine to a specific CPU on the host system.
@@ -135,3 +218,7 @@ the hypervisor is practically unnoticeable.
   a single platform (with a single TPM device).
   Including the secure migration of the TPM state from one physical system
   to another when domainU guests are migrated from one system to another.
+* Security concerns due to potential information leaks when
+  instructions executed speculatively.
+* Ability to save virtual machine state and migrate it easily to another machine.
+* Ability to debug code in any privilige mode (protection ring).
