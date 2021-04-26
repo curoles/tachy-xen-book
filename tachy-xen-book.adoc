@@ -18,6 +18,9 @@
 include::intro/intro.adoc[]
 
 include::ch1/ch1.adoc[]
+include::ch_vcpu/ch_vcpu.adoc[]
+include::ch_iommu/ch_iommu.adoc[]
+include::ch_svio/ch_svio.adoc[]
 
 include::glossary.adoc[]
 include::bibliography.adoc[]

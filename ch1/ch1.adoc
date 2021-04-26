@@ -11,7 +11,7 @@ Therefore the name Xen is hinting at advanced alien technology.
 
 Word Xen is often combined with word "hypervisor",
 because Xen virtual machine monitor is a hypervisor.
-Prefix _hyper_ here means "super-duper". 
+Prefix _hyper_ here means "above super". 
 OS kernel runs at elevated privilege level compare to applications
 and is called _supervisor_ because it a) manages the applications
 and b) has more priviledges than application code.
@@ -167,15 +167,141 @@ or when new device is to be designed:
 
 === Paravirtualization
 
-TODO
+The paravirtualization approach assumes that a guest system _knows_ that it
+runs on top of a hypervisor. Because of that knoweledge it becomes possible:
+
+1. to compile OS kernel without using problematic instructions that do not trap
+   into the hypervisor, intead use some direct methods to communuicate with
+   the hypervisor;
+2. run inside less priveledged level and do not use any priveledged instructions,
+   instead delegate all work to the hypevisor by means of _hypercalls_;
+3. simplify a view at the system, do not implement device drivers for any real hardware,
+   instead delegate administrative domain dom0 to talk to the real hardware and
+   use simple drivers to communicate with dom0 abstract devices.
+
+Note that in the past when x86 did not have enough support for the full hardware-assisted
+virtualization, the paravirtualization was the only sensible solution
+providing reasonable performance. However, it does not mean that the paravirtualization
+is not used now days; due to its simplicity compare to HW/SW solutions and the fact
+that in many cases paravirtualizartion still provides better performance,
+the paravirtualization is widely used when customizing OS is possible.
+
 
 === Hardware-Assisted Virtualization
 
-TODO
+The hardware assisted virtualization, often referred to as HVM (Hardware Virtual Machine),
+allows running of unmodified operating systems and relies on HW support of virtualization.
 
 === Types of virtualization
 
-TODO check Xen wiki, 5 types total?
+The are many definitions and terminology involved when we look at different
+types of virtualization, so many that it is confusing sometimes.
+First of all, there are hypervisor Type-1 and Type-2.
+
+From here on we will use Tachyum notation PLn of the privilege levels, where
+n=0 is most priveleged level, n=1 is hypervisor level, n=2 is kernel level
+and n=3 is user level.
+
+Hypervisor Type-1 is native or bare-metal hypervisor.
+These hypervisors run directly on the host's hardware
+to control the hardware and to manage guest operating systems.
+
+[ditaa]
+....
+  +----------+ +----------+ +----------+
+  |   Apps   | |   Apps   | |   Apps   |  PL3
+  +----------+ +----------+ +----------+
+
++----------------------------------------+
+
+  +----------+ +----------+ +----------+
+  | Admin OS | | Guest OS | | Guest OS |  PL2
+  +----------+ +----------+ +----------+
+
++----------------------------------------+
+
+  +------------------------------------+
+  |          Hypervisor                |  PL1
+  +------------------------------------+
+
++----------------------------------------+
+
+  +------------------------------------+
+  |           Hardware                 |
+  +------------------------------------+
+....
+
+Hypervisor Type-2 is hosted hypervisor.
+These hypervisors run on a conventional operating system
+just as other computer programs do.
+A guest operating system runs as a process on the host.
+Type-2 hypervisors abstract guest operating systems from the host operating system.
+
+[ditaa]
+....
+  +----------+ +----------+ +----------+
+  |   Apps   | |   Apps   | |   Apps   |  PL3
+  +----------+ +----------+ +----------+
+
++----------------------------------------+
+               +----------+ +----------+
+               | Guest OS | | Guest OS |
+               +----------+ +----------+
+
+  +------------------------------------+
+  |                                    |
+  |  Host OS                           |  PL2
+  |            +-----------------------+
+  |            | +-----------------------+
+  | Hypervisor |
+  |            |
+  +------------+                        PL1
+
++----------------------------------------+
+  +------------------------------------+
+  |           Hardware                 |
+  +------------------------------------+
+....
+
+The line between Type-1 and Type-2 sometime is not clear.
+For instance, Linux's Kernel-based Virtual Machine (KVM) is a) kernel module,
+b) uses _lowvisor_ that can run at PL1, c) the whole host OS can
+run in PL1 on ARM systems with Virtualization Host Extension support.
+
+Xen is hypervisor Type-1.
+
+Next distinction is by degree of HW support used by virtualization and
+how much is paravirtualized. Remember we talked about pure paravirtualization (PV)
+approach and hardware assisted HVM approach.
+In Xen there are many hybrid solutions in between these two.
+
+Looking at the history of Xen development can shed some light on the
+origin of different hybrid solutions.
+
+.Guest types evolutuion for Xen, wiki.xenproject.org.
+image::https://wiki.xenproject.org/images/b/b1/GuestModes.png[]
+
+.Overview of the various virtualization modes implemented in Xen, wiki.xenproject.org.
+image::https://wiki.xenproject.org/images/f/f2/XenModes.png[]
+
+=== The role of dom0
+
+TODO
+
+=== Unprivileged domains
+
+TODO
+
+https://wiki.xenproject.org/wiki/Xen_Project_Software_Overview,
+I/O Virtualization in Xen. No HVM without QEMU???
+
+.I/O Virtualization using the split driver model .
+image::https://wiki.xenproject.org/images/a/ae/IOVirt_PV.png[]
+
+.I/O Virtualization using QEMU user space back-end drivers.
+image::https://wiki.xenproject.org/images/3/3c/IOVirt_QEMU.png[]
+
+
 
 === History Of Problems with Virtualization
 
@@ -222,3 +348,50 @@ the hypervisor is practically unnoticeable.
   instructions executed speculatively.
 * Ability to save virtual machine state and migrate it easily to another machine.
 * Ability to debug code in any privilige mode (protection ring).
+* <<dall>> Ability to run Host OS at hypervisor privilege level without paying
+  high price for the swithing levels, levels should have its own copy
+  of all special registers to avoid saving and restoring state.
+  OS running at PL1 should be able to communicate with PL3 user space code;
+  requires handling exceptions from PL3 directly to PL1.
+* 2 stage memory translation
+* <<dall>> Hypervisor software running in PL1(HYP) should be able
+  to completely disable the stage 2 translations when running
+  the hypervisor OS kernel (KVM) or dom0(Xen),
+  giving it full access to all physical memory on the system,
+  and conversely enable stage 2 translations when running VM
+  kernels to limit VMs to manage memory allocated to them.
+
+=== TODO STUDY
+
+Rapid Virtualization Indexing (RVI)::
+Helps accelerate the performance of many virtualized applications
+by enabling hardware-based VM memory management
+
+AMD-V Extended Migration::
+Helps virtualization software with live migrations of VMs between all available AMD Opteron processor generations
+
+check references:
+https://en.wikipedia.org/wiki/X86_virtualization#AMD_virtualization_(AMD-V)
+
+https://lwn.net/Articles/182080/ says: There is also a cache called an IOTLB which improves performance.
+In the AMD IOMMU there is optional support for IOTLBs.
+
+https://www.starlab.io/blog/how-the-xen-hypervisor-supports-cpu-virtualization-on-arm
+
+<<dall>> What if we run dom0 at PL1?
+
+arm64: Virtualization Host Extension support,
+https://lwn.net/Articles/674533/
+
+https://www.embedded.com/understanding-virtualization-facilities-in-the-armv8-processor-architecture/,
+the second translation table for the EL2 level, TTBR1_EL2, was added as a part of VM host extensions so that the hypervisors of Type 2 would have its own translation
+
+check sMMUv3.1, ARM System Memory Management Unit Architecture Specification SMMU architecture version 3.0 and version 3.1
+
+interesting usage of time diagrams: https://genode.org/documentation/articles/arm_virtualization
+
+http://www.cs.columbia.edu/~cdall/pubs/isca2016-dall.pdf
+
+ARM provides interrupt virtualization through a set of virtualization extensions to the ARM Generic Interrupt Controller (GIC) architecture, which allows a hypervisor to program the GIC to inject virtual interrupts to VMs, which VMs can acknowledge and complete without trapping to the hypervisor.
+
+http://www.linux-kvm.org/images/7/79/03x09-Aspen-Andre_Przywara-ARM_Interrupt_Virtualization.pdf

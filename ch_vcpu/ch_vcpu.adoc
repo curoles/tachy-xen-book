@@ -1,0 +1,48 @@
+== Virtual CPU
+
+=== Definition Of Virtual CPU
+
+An VM's OS naturally expects HW to have CPU(s).
+We do not want to (generally) allocate one physical CPU (pCPU) to VM
+because we may have less CPUs than there are VMs and because such
+allocation does not allow for flexible allocation of HW resources.
+For that there is such as abstraction as Virtual CPU (vCPU);
+we can create as many vCPUs as we wish (considering practical limitations).
+Each vCPU is seen as a single physical CPU core by the VM's operating system.
+One or more vCPUs are assigned to every Virtual Machine (VM).
+
+To create an abstraction of vCPU all virtualization solutions use
+the idea of time multiplexing when each vCPU gets its own time slot
+on some pCPU.
+Similar to OS processes that can run sequentially on a single physical CPU
+to create an illusion of simultaniously running tasks,
+vCPUs sequentially run on a physical CPU to create an illusion
+of existence of many CPUs.
+An OS running inside virtualization domain believes that it runs on designated
+only to it CPU(s).
+In addition to saving architectural state (registers and etc.) on the
+switch between vCPUs, hypervisor and virtualizing HW should properly queue and route
+virtual interrupts to vCPUs.
+
+
+
+=== vCPU Pinning for guests
+
+You can dedicate a physical CPU to a particular virtual CPU or a set of virtual cpus.
+
+=== NUMA
+
+https://wiki.xenproject.org/wiki/Tuning_Xen_for_Performance
+
+https://wiki.xenproject.org/wiki/Xen_on_NUMA_Machines
+
+A NUMA machine is typically a multi-sockets machine built in such a way
+that processors have their own local memory.
+A group of processors connected to the same memory controller is usually called a node.
+Accessing memory from remote nodes is always possible, but it is usually very slow.
+Since VMs are usually small (both in number of vcpus and amount of memory)
+it should be possible to avoid remote memory access altogether.
+Both XenD and xl (starting from Xen 4.2) try to automatically make that happen by default.
+This means they will allocate the vcpus and memory of your VMs trying to take
+the NUMA topology of the underlying host into account,
+if no vcpu pinning or cpupools are specified.

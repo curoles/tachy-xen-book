@@ -1,0 +1,114 @@
+== Discussions
+
+
+=== 04/21/2021 Meeting
+
+Action items:
+
+ 1. Igor L., email to Rado about ARI bits
+ 2. Igor L./Miro, PL3(U)-PL1(H) research if additional HW is needed to support
+   U-H (1 level) and U-J-H (2 levels) translations at the same time.
+ 3. Miro, research on implications of bootloader running in HYP mode
+
+Q&A session
+
+- Q: Shall we support running OS in PL1(H)?
+
+  A: yes
+
+- Q: Shall we support nested virtualization?
+
+  Rado A: yes, it seems no additional HW is needed
+
+- Q: "K" Registers redirection
+
+  A: We will use "K" registers in the kernel code, when kernel runs in PL1(HYP)
+  they do not trap and act as "H" registers.
+
+- Q: How bootloader in PL2(K) loads hypervisor running in PL1(H)?
+  what is that "jump" changing K->H?
+
+  Igor S. proposal: bootloader always runs in PL1(HYP)
+
+  Action item: research on implications of bootloader running in HYP mode.
+
+
+- Q: Why can't we use second-level TLB for Nested page translation?
+
+  A: TLB holds translations for **BOTH** levels (separated by ID),
+    effectively we have "many" TLBs
+
+  ISA spec ch 4.13 translation and TLB,  ch 6 translation special regs
+
+- Q: HW supported shadow-pages?
+  SW managed shadow page table is expensive because VM exit
+  is required to sync the shadow page with guest page table.
+  What is actually Rado's idea, how to avoid the sync?
+
+  I know about hybrids like https://research.cs.wisc.edu/multifacet/papers/isca16_agile_paging.pdf,
+  but I have not seen non hybrid solution with HW-managed shadow page table.
+
+
+  Rado: Guest OS tells Hyp (special insn) about changes in Pages,
+  Hyp uses nested to update Shadow.
+
+  The "special insn" is NOP when no hypervisor.
+
+  Igor S. view: HW support comes in a way to enable **dynamic** switch between
+  using Shadow Page Table if it can serve TLB and 2-level translation.
+
+
+- Q: Does HW team know what is needed in CPU/System to use SR-IOV?
+
+  https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.0/html/hardware_considerations_for_implementing_sr-iov/index
+
+  The PCIe specification supports greater numbers of VFs through
+  the implementation of Alternative Routing ID Interpretation (ARI),
+  which reinterprets the device number field in the PCIe header
+  allowing for more than eight functions. This translation relies on
+  both the PCIe device and the port immediately upstream of the device,
+  whether root port or switch, supporting ARI.
+
+  PCIe device must support ACS or ACS-equivalent capability and
+  CPU root ports used must support ACS or ACS-equivalent capability.
+
+  Access Control Service (ACS) capabilities defined in the PCIe
+  and server specifications are the hardware standard
+  for maintaining isolation within IOMMU groups.
+
+- Q: Spec for Tachyum IOMMU? Who is working on it?
+
+  Bill
+
+- Q: Will we be able to run OS at PL1(HYP) level? Do we want it?
+
+  http://www.cs.columbia.edu/~cdall/pubs/atc17-dall.pdf
+
+  1. VHE introduces additional EL2 registers to provide
+  the same functionality available in EL1 to software runningin EL2.
+  2. VHE supports running host user space applications
+  that use virtual memory in EL0 and interact directly
+  with a kernel running in EL2.
+  3. VHE changes the page table format of EL2 to use
+  the same format as used in EL1, which avoids the need to
+  change an existing OS kernel’s page table management code
+  to support different formats. VHE also adds support to EL2
+  for an additional separate virtual address space...
+
+- Timer (time managements) specific HW optimization(s).
+  Timer SUB instructions, anything else?
+
+- Xen communication is based on memory sharing (copy and transfer),
+  do we have special optimizations for that?
+
+- Virtual interrupts
+
+- what is virtual CPU in our case?
+
+  a page of memory might be allocated to a VM, and therefore be 
+  accessible to all the vCPUs in that VM. However, a virtual interrupt
+  is targeted at a specific vCPU, and can only go to that vCPU.
+
+- Fast HCALL?
+
+- what is our state for migration?

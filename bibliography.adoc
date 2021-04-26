@@ -2,8 +2,13 @@
 [bibliography]
 == References
 
-* [[[pp]]] Andy Hunt & Dave Thomas. The Pragmatic Programmer:
-From Journeyman to Master. Addison-Wesley. 1999.
-* [[[gof,gang]]] Erich Gamma, Richard Helm, Ralph Johnson & John Vlissides.
-Design Patterns: Elements of Reusable Object-Oriented Software. Addison-Wesley. 1994.
-* [[[popek]]] GJ Popek. Formal requirements for virtualizable third generation architectures. 1974
+* [[[popek]]] GJ Popek.
+  Formal requirements for virtualizable third generation architectures. 1974
+* [[[jeongseob]]] Jeongseob Ahn, Seongwook Jin, and Jaehyuk Huh.
+  Revisiting Hardware-Assisted Page Walks for Virtualized Systems.
+  http://calab.kaist.ac.kr/~jhuh/papers/ahn_isca2012.pdf
+* [[[dall]]] Christoffer Dall, Shih-Wei, LiJason Nieh.
+  Optimizing the Design and Implementation of the Linux ARM Hypervisor.
+* [[[dong]]] Yaozu Dong, Zhao Yu and Greg Rose.
+  SR-IOV Networking in Xen: Architecture, Design and Implementation. 2008
+  https://www.usenix.org/legacy/event/wiov08/tech/full_papers/dong/dong.pdf

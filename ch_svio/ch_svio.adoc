@@ -1,0 +1,9 @@
+== Self-Virtualized I/O and SR-IOV
+
+
+
+https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.92.9539&rep=rep1&type=pdf
+
+https://www.usenix.org/legacy/event/wiov08/tech/full_papers/dong/dong.pdf
+
+https://www.usenix.org/legacy/event/wiov08/tech/full_papers/levasseur/levasseur_html/#:~:text=The%20Alternative%20Routing%2DID%20Interpretation,is%20assumed%20to%20be%200).
