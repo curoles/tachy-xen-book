@@ -1,0 +1,77 @@
+== IOMMU - I/O Memory Management Unit
+
+There are cases when we want to give VM guest pass-through access to a device.
+First case is when we either can't effectively share the device (display, for example)
+or we simply want just one guest to have access to it.
+Second case is when we have Self Virtualized I/O device that can present itself
+to the system as many devices (for example, SR-IOV NIC Virtual Function).
+
+The pass-through access to a device means that only one VM has access to it,
+other VMs do not have access to this device and therefore can't use it.
+There are two major concerns related to pass-through access that have to
+be handled properly:
+
+- Safe DMA.
+- Correct interrupt delivery.
+
+The problem with DMA is due to the fact that VM guest does not know
+actual machine addresses, it operates with intermediate physical addresses.
+Therefore it can't properly set up DMA transaction without an additional
+help from SW driver or HW.
+To solve this problem CPU designers use I/O Memory Management Unit (IOMMU)
+that eliminates the need for virtualization-aware drivers for pass-through
+devices with DMA.
+
+=== Operation of IOMMU
+
+An IOMMU is similar to the processor's MMU, but it works from the device's perspective.
+VM guest communicates with IOMMU capable device using a virtual address,
+therefore the device initiates a DMA operation also using a virtual address, rather
+then a physical address.
+IOMMU translates the address into a machine address.
+To perform the translation IOMMU uses the same page tables as CPU's MMU.
+
+Tachyxx IOMMU also includes a mechanism for interrupt remapping.
+A device's interrupts are assigned to a Virtual CPU (vCPU),
+rather than physical CPU (pCPU).
+Each interrupt is uniquely identified not only by its interrupt number,
+but also by the originator ID (derived from the PCI device ID).
+This pair {IRQ, devID} is then used to generate a mapping to a vCPU number.
+These virtual interrupts are automatically queued by the hardware,
+and only delivered when the target vCPU is scheduled (without any
+involvement from a hypervisor).
+
+=== Tachyxx IOMMU implementation
+
+Tachyuxx systems usually have several IOMMUs connected to different PCIe channels.
+Each IOMMU has I/O MMU and IOTLB.
+The IOTLB is a four-level lookup to convert virtual to physical addresses.
+The IOTLB does a lookup and returns a physical address to be used in DMA operation.
+On IOTLB miss (when IOTLB does not have required VA to PA translation) the IOMMU
+does the lookup by way of doing HW page walking; the new translation then gets inserted into the IOTLB.
+
+Tachyxx CPU connects to all external devices with PCIe channels.
+PCIe channels are connected to several PCIe SubSystem (PCIeSS) modules.
+IOMMU (with IOTLB and I/O MMU) is included into PCIeSS.
+The other side of PCIeSS module is interfacing memory Mesh;
+IOMMU is translating an address coming from Mesh.
+DMA engines are also part of PCIeSS module.
+
+When PCIe Controller inside PCIeSS generates a virtual address,
+it gets translated to physical by IOTLB (IOMMU address translation
+happens on the TLB miss).
+
+Tachyxx CPU VA/PA/MA address size:
+
+- The Virtual Address (VA) size is 64 bits.
+- The Physical Address (PA) size is 53 bits.
+- The Machine Address (MA) size is 53 bits.
+
+=== Interrupt Remapping for Virtualization
+
+The I/O device can send Message Signaled Interrupt (MSI-X)
+by sending write packet to predefined memory location.
+Without interrupt remapping Hypervisor will have to be involved
+in creating I/O and in handling interrupts and forwarding them to guest operating system.
+The IOMMU provides functionality to translate MSI-X memory location
+and therefore virtualize interrupts.
