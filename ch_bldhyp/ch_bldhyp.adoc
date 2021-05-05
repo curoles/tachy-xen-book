@@ -1,0 +1,161 @@
+== Build Xen hypervisor
+
+=== Cloning source
+
+The first step of adding a new architecture to Xen is to clone Xen
+project and setup proper version control to be able to merge
+quickly evolving main branch into your development branch.
+
+Following examples are obtained with Gitlab, however there is nothing Gitlab
+specific in the used commands and they should work on any Git server.
+
+First step is to clone Xen sources from the official repository
+and to make Git origin point to the new Gitlab repository instead of
+the origin of the main Xen repository.
+
+[source,terminal]
+----
+mkdir xen
+cd xen/
+git clone https://github.com/xen-project/xen.git
+cd xen
+git remote rename origin old-origin  # <1>
+git remote add origin git@gitlab.tachyum.com:sw-dev/hypervisor/xen-project/xen.git
+git push -u origin --all
+git push -u origin --tags
+----
+
+<1> Save and preserve Github origin.
+
+Next step is to create a development branch based on some stable snapshot.
+
+[source,terminal]
+----
+$ git status
+On branch master
+$ git checkout RELEASE-4.14.1
+Note: switching to 'RELEASE-4.14.1'.
+HEAD is now at ad844aa352 update Xen version to 4.14.1
+$ git switch -c tachyum-develop
+Switched to a new branch 'tachyum-develop'
+$ git push --set-upstream origin tachyum-develop
+----
+
+=== Update to newer Xen version
+
+The way Xen repositories are managed, tags like RELEASE-4.14.1 are not on
+the master branch, instead they are on a release branch.
+It complicates merging of our changes with updates of another release.
+
+----
+git checkout master
+git fetch old-origin    # fetch latest code from github
+merge old-origin/master # merge changes from old-origin (github) to origin (Gitlab)
+git push origin         # push local changes upstream to origin 
+git push --tags
+git checkout RELEASE-4.15.0
+git checkout -b tachyum-develop-new
+# cherry pick
+git checkout tachyum-develop
+git difftool -d RELEASE-4.14.1 
+git checkout tachyum-develop-new 
+git difftool -d RELEASE-4.15.0 
+git checkout tachyum-develop
+----
+
+=== Building Xen
+
+Xen project has many pieces: the hypervisor, dom0 Linux OS, tools and so on.
+Right now we are going to focus on building the hypervisor only.
+
+The first phase of building is configuring of the build.
+We are going to configure the build to use Tachyum toolchain for the compilation.
+
+[source,terminal]
+----
+$ ./configure --prefix=`pwd`/../build --exec_prefix=`pwd`/../tbuild --target=tachy --host=tachy --disable-tools --disable-docs --disable-stubdom
+----
+
+----
+checking build system type... x86_64-pc-linux-gnu
+checking host system type... Invalid configuration `tachy': machine `tachy-unknown' not recognized
+configure: error: /bin/bash ./config.sub tachy failed
+----
+
+----
+$ git diff config.sub
+diff --git a/config.sub b/config.sub
+index f53af5a2da..1e728546cf 100644
+--- a/config.sub
++++ b/config.sub
+@@ -1241,6 +1241,7 @@ case $cpu-$vendor in
+                        | sparcv8 | sparcv9 | sparcv9b | sparcv9v | sv1 | sx* \
+                        | spu \
+                        | tahoe \
++                       | tachy \
+                        | tic30 | tic4x | tic54x | tic55x | tic6x | tic80 \
+                        | tron \
+                        | ubicom32 \
+----
+
+
+make build-xen XEN_TARGET_ARCH=tachy CROSS_COMPILE=tachy-linux-gnu-
+
+[source,terminal]
+----
+$ export PATH=$PATH:/project/prodigy-sw/ilesik/install/set0/bin
+$ make build-xen XEN_TARGET_ARCH=tachy CROSS_COMPILE=tachy-linux-gnu-
+Config.mk:69: /project/prodigy-sw/ilesik/xen/xen/config/tachy.mk: No such file or directory
+make: *** No rule to make target '/project/prodigy-sw/ilesik/xen/xen/config/tachy.mk'.  Stop.
+----
+
+
+.Changes needed for `make build-xen` to finish without an error.
+[source,console]
+----
+$ git status
+On branch tachyum-develop
+Your branch is up to date with 'origin/tachyum-develop'.
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   config/tachy.mk
+	new file:   xen/arch/tachy/Kconfig
+	new file:   xen/arch/tachy/Kconfig.debug
+	new file:   xen/arch/tachy/Makefile
+	new file:   xen/arch/tachy/Rules.mk
+	new file:   xen/arch/tachy/arch.mk
+	new file:   xen/arch/tachy/configs/tachy_defconfig
+	new file:   xen/include/asm-tachy/byteorder.h
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   config.sub
+----
+
+
+
+xen/arch/tachy - head.S, Makefife, arch.mk
+xen/include/asm-tachy
+
+xen/common/ C files
+
+
+----
+ls ./xen/include/asm-tachy/
+altp2m.h       device.h         irq.h         setup.h
+asm-offsets.h  div64.h          mem_access.h  smp.h
+asm_defns.h    domain.h         mm.h          softirq.h
+atomic.h       event.h          monitor.h     spinlock.h
+bitops.h       flushtlb.h       nospec.h      string.h
+bug.h          grant_table.h    numa.h        system.h
+byteorder.h    guest_access.h   p2m.h         time.h
+cache.h        guest_atomics.h  page.h        trace.h
+config.h       hardirq.h        paging.h      types.h
+cpufeature.h   hypercall.h      pci.h         vm_event.h
+current.h      init.h           percpu.h      xenoprof.h
+debugger.h     io.h             processor.h
+delay.h        iocap.h          random.h
+desc.h         iommu.h          regs.h
+----
