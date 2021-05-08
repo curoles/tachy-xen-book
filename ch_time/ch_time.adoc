@@ -17,7 +17,7 @@ System time:: This is a 64-bit counter which holds the number of
 nanoseconds that have elapsed since system boot.
 Wall clock time:: This is the time of day in a Unix-style `struct timeval`.
 Domain virtual time:: This progresses at the same pace as system time,
-but only while a domain is executing -- it stops while a domain is de-scheduled.
+but only while a domain is executing, it stops while a domain is de-scheduled.
 
 === PV Timestamps
 

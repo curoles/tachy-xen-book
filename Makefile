@@ -14,6 +14,7 @@ outputs: pdf_output html_output docbook_output
 
 pdf_output: $(SRCs)
 	asciidoctor-pdf -a icons -a allow-uri-read -d book $(ADIAGRAM) -D $(OUT_DIR)/pdf $(MASTER_ADOC)
+	cp $(OUT_DIR)/pdf/tachy-xen-book.pdf $(SRC_DIR)/output/pdf/tachy-xen-book.pdf
 
 html_output: $(SRCs)
 	asciidoctor -b html5 -a icons -d book $(ADIAGRAM) -D $(OUT_DIR)/html $(MASTER_ADOC)

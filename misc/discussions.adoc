@@ -91,7 +91,7 @@ Q&A session
   with a kernel running in EL2.
   3. VHE changes the page table format of EL2 to use
   the same format as used in EL1, which avoids the need to
-  change an existing OS kernel’s page table management code
+  change an existing OS kernel's page table management code
   to support different formats. VHE also adds support to EL2
   for an additional separate virtual address space...
 
