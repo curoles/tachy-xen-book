@@ -1,0 +1,46 @@
+== Time
+
+Guest operating systems need to be aware of the passage of both
+real (or wallclock) time and their own "virtual time", which is
+the time for which they have been executing.
+Furthermore, Xen has a notion of time which is used for scheduling.
+
+=== Notions of time
+
+The following notions of time are provided:
+
+Cycle counter time:: This provides a fine-grained time reference.
+The cycle counter time is used to accurately extrapolate the other time references.
+On SMP machines it is currently assumed that the
+cycle counter time is synchronized between CPUs.
+System time:: This is a 64-bit counter which holds the number of
+nanoseconds that have elapsed since system boot.
+Wall clock time:: This is the time of day in a Unix-style `struct timeval`.
+Domain virtual time:: This progresses at the same pace as system time,
+but only while a domain is executing -- it stops while a domain is de-scheduled.
+
+=== PV Timestamps
+
+Xen exports timestamps for system time and wall-clock time to guest operating systems
+through a shared page of memory.
+Xen also provides the cycle counter time at the instant the timestamps were calculated,
+and the CPU frequency in Hertz.
+This allows the guest to extrapolate system and wall-clock times accurately
+based on the current cycle counter time.
+
+Since all timestamps need to be updated and read _atomically_ two version numbers
+are also stored in the shared info page. The first is incremented prior to an update,
+while the second is only incremented afterwards. Thus a guest can be sure that it read
+a consistent state by checking the two version numbers are equal.
+
+=== PV periodic ticker
+
+Xen includes a periodic ticker which sends a timer event to the currently
+executing domain every 10ms. The Xen scheduler also sends a timer event
+whenever a domain is scheduled; this allows the guest OS to adjust for
+the time that has passed while it has been inactive.
+In addition, Xen allows each domain to request that they receive a timer event
+sent at a specified system time by using the `set_timer_op()` hypercall.
+Guest OSes may use this timer to implement timeout values when they block.
+
+

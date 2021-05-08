@@ -2,7 +2,7 @@
 :author: Igor Lesik
 :email: ilesik@tachyxx.com
 :revnumber: v0.1
-:revdate: 2021.03.30
+:revdate: 2021.05.07
 :doctype: book
 :chapter-label:
 :sectnums:
@@ -22,6 +22,16 @@ include::ch1/ch1.adoc[]
 include::ch_bldhyp/ch_bldhyp.adoc[]
 
 include::ch_vcpu/ch_vcpu.adoc[]
+
+include::ch_mem/ch_mem.adoc[]
+
+include::ch_interrupts/ch_interrupts.adoc[]
+
+include::ch_time/ch_time.adoc[]
+
+include::ch_smp/ch_smp.adoc[]
+
+include::ch_device/ch_device.adoc[]
 
 include::ch_iommu/ch_iommu.adoc[]
 

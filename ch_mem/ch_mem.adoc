@@ -1,0 +1,38 @@
+== Memory
+
+Xen hypervisor is responsible for managing the allocation of
+physical memory to domains, and for ensuring safe use of the paging hardware.
+
+=== Memory allocation
+
+Xen hypervisor resides within a small fixed portion of physical memory;
+it also reserves the top 64MB of every virtual address space. (TODO check if it is still true; and explain purpose)
+The remaining physical memory is available for allocation to domains at a page granularity.
+Xen tracks the ownership and use of each page,
+which allows it to enforce secure partitioning between domains.
+
+Each domain has a maximum and current physical memory allocation.
+A guest OS may run a "balloon driver" to dynamically adjust its
+current memory allocation up to its limit.
+
+=== Pseudo-physical and machine memory
+
+_Machine memory_ refers to the entire amount of memory installed in the machine,
+including that reserved by Xen, in use by various domains, or currently unallocated.
+We consider machine memory to comprise a set of 4K _machine page frames_ numbered
+consecutively starting from 0.
+Machine frame numbers (MFN) mean the same within Xen or any domain.
+
+_Pseudo-physical memory_, on the other hand, is a per-domain abstraction.
+It allows a guest operating system to consider its memory allocation to consist
+of a contiguous range of physical page frames starting at physical frame 0,
+despite the fact that the underlying machine page frames may be
+sparsely allocated and in any order.
+
+To achieve this, Xen maintains a globally readable _machine-to-physical_ table which records 
+the mapping from machine page frames to pseudo-physical ones.
+In addition, each domain is supplied with a physical-to-machine table
+which performs the inverse mapping.
+Clearly the machine-to-physical table has size proportional to the amount of RAM installed in the machine,
+while each physical-to-machine table has size proportional to the memory allocation of the given domain.
+

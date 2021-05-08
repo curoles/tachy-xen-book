@@ -1,0 +1,3 @@
+== SMP support
+
+how domains are assigned to CPUs?????

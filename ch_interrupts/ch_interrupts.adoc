@@ -1,0 +1,12 @@
+== Interrupts
+
+http://www-archive.xenproject.org/files/xen_interface.pdf says:
+A virtual IDT is provided - a domain can submit a table of
+trap handlers to Xen via the `set_trap_table()` hypercall.
+
+=== PV Interrupts and events
+
+The hypervisor handles the interrupts, turns them into _events_ that
+get delivered asynchronously to the target domain using a callback
+supplied via the `set_callbacks()` hypercall.
+A guest OS can map these events onto its standard interrupt dispatch mechanisms.

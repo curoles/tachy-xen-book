@@ -1,0 +1,40 @@
+== Devices
+
+=== PV devices
+
+Devices such as network and disk are exported to guests using a splitd evice driver.
+The device driver domain (usually dom0), which accesses the physical device
+directly also runs a backend driver, serving requests to that device from guests.
+Each guest will use a simple frontend driver, to access the backend.
+Communication between these domains is composed of two parts:
+First, data is placed on to a shared memory page between the domains.
+Second, an event channel between the two domains is used to pass notification
+that data is outstanding. This separation of notification from data transfer
+allows message batching, and results in very efficient device access.
+
+Event channels are used extensively in device virtualization;
+each domain has a number of end-points or _ports_ each of which
+may be bound to one of the following _event sources_:
+
+- a physical interrrupt from a real device,
+- a virtual interrupts (callback) from Xen hypervisor, or
+- a signal from another domain.
+
+Events are lightweight and do not carry much information beyond
+the source of the notification.
+Hence when performing bulk data transfer, events are typically used
+as synchronization primitives over a shared memory transport.
+Event channels are managed via the `event_channel_op()` hypercall.
+
+=== PV Network I/O
+
+
+=== PV Block I/O
+
+
+=== PV PCI
+
+Guest operating systems should not attempt to determine the PCI
+configuration directly by accessing the PCI BIOS.
+Instead, they should use Xen hypercall `physdev_op(void *physdev_op)`
+to perform PCI configuration; it can be PCI config read, write and so on.
