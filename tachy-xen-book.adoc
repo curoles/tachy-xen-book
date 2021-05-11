@@ -21,6 +21,8 @@ include::ch1/ch1.adoc[]
 
 include::ch_bldhyp/ch_bldhyp.adoc[]
 
+include::ch_qemu/ch_qemu.adoc[]
+
 include::ch_vcpu/ch_vcpu.adoc[]
 
 include::ch_mem/ch_mem.adoc[]

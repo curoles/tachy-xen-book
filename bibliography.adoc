@@ -12,3 +12,6 @@
 * [[[dong]]] Yaozu Dong, Zhao Yu and Greg Rose.
   SR-IOV Networking in Xen: Architecture, Design and Implementation. 2008
   https://www.usenix.org/legacy/event/wiov08/tech/full_papers/dong/dong.pdf
+* [[[bruno]]] Bruno Sa, Jose Martins, Sandro Pinto
+  A First Look at RISC-V Virtualization from anEmbedded Systems Perspective
+  https://arxiv.org/pdf/2103.14951.pdf

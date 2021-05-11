@@ -1,0 +1,71 @@
+== Run Xen on QEMU
+
+=== Run Xen
+
+Tachyum QEMU "virt" machine jumps to address 0x80000000
+after loading a binary (in system mode).
+
+.The trampoline in Tachyum QEMU
+[source, terminal]
+----
+    uint32_t reset_vec[8] = {
+    /* 0x00*/ TACHYUM_CTOR_INSN_LI(0,0),         // r0 <- 0
+    /* 0x04*/ TACHYUM_CTOR_INSN_LD8PC(1,0x14),   // r1 <- [pc + 0x14]
+    /* 0x08*/ TACHYUM_CTOR_INSN_LD8PC(8,0x8),    // r8 <- [pc + 0x8]
+    /* 0x0C*/ TACHYUM_CTOR_INSN_JMPR(8),         // jmpr r8
+    /* 0x10*/ kernel_entry, kernel_entry >> 32,  // 64 bit kernel entry address
+    /* 0x18*/ fdt_load_addr, fdt_load_addr >> 32 // 64 bit fdt address
+    };
+----
+
+If the `head.S` has nothing except few NOPs and looks like:
+
+[source]
+----
+GLOBAL(start)
+    nop
+    nop
+    nop
+    nop
+
+GLOBAL(_end_boot)
+----
+
+Then running it on QEMU with command line parameter `-d in_asm` to see input instructions
+will output something like:
+
+[source, terminal]
+----
+$ qemu-system-tachy -M virt -m 4G -nographic -d in_asm -kernel ./xen/xen-syms
+
+IN: 
+0x0000000000001000:  li	sp, 0
+0x0000000000001004:  ldl	r1, [0x14] # 0x1018
+0x0000000000001008:  ldl	r8, [0x8] # 0x1010
+0x000000000000100c:  jmpr	r8
+
+IN: 
+0x0000000080000000:  nop
+0x0000000080000004:  nop
+0x0000000080000008:  nop
+0x000000008000000c:  nop
+----
+
+
+
+=== Run Tachyum Linux kernel
+
+==== KGDB
+
+see https://intranet.tachyum.com/en/teams/swdevs/kgdb
+
+[source, terminal]
+----
+qemu-system-tachy -M virt -m 4G -kernel vmlinux -append "earlycon=ns16550,mmio,0x00030000,115200n8 earlyprintk root=/dev/vda ro console=ttyS0 kgdbwait kgdboc=ttyS0,115200" -drive file=tachy-rootfs.bin,format=raw,id=hd0 -device virtio-blk-device,drive=hd0 -serial tcp::2345,server,nowait
+----
+
+`kgdbwait kgdboc=ttyS0,115200` will stop the kernel after the first boot steps
+and wait for the connection from gdb.
+
+`-serial tcp::2345,server,nowait` - all input/output go through serial console,
+which is redirected to tcp port 2345.
