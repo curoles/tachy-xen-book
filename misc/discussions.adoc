@@ -111,4 +111,27 @@ Q&A session
 
 - Fast HCALL?
 
-- what is our state for migration?
+- what is our state for migratio
+
+
+=== 2021-05-13 Virtualization support in QEMU
+
+Miro,
+
+I do not think the virtualization code is localized in one place, except for files hw/arm/virt.{h,c}
+
+I do “grep -i” for `_EL2`, “VIRQ”, “IOMMU”, “VIRT_” to find relevant ARM code (| grep -i arm).
+
+RISC-V virtualization support in QEMU:
+
+- GitHub - alistair23/qemu: Alistair's fork of the official QEMU repository
+- GitHub - kvm-riscv/qemu: QEMU RISC-V Repo
+- [RFC,XEN,00/23] xen: beginning support for RISC-V - Patchwork (kernel.org)
+- LKML: Anup Patel: RISC-V Hypervisors
+- KVM RISCV64 on QEMU · kvm-riscv/howto Wiki · GitHub
+
+I propose:
+1. We discuss and review QEMU changes (I want/need to understand what we change in QEMU).
+2. For every change we have a test case with KVM, Xen or direct test (in “bringup-tests” repo).
+
+-Igor L

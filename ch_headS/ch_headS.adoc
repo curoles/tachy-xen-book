@@ -1,0 +1,11 @@
+== Coding head.S
+
+
+
+https://people.kernel.org/linusw/how-the-arm32-kernel-starts
+
+https://people.kernel.org/linusw/setting-up-the-arm32-architecture-part-1
+
+https://patchew.org/Xen/20190812173019.11956-1-julien.grall@arm.com/20190812173019.11956-29-julien.grall@arm.com/
+
+https://gitlab.tachyum.com/sw-dev/dev-tools/qemu/-/commit/2661f6762da95faa6ff7c533a86b1aa76452d88f

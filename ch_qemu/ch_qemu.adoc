@@ -52,6 +52,18 @@ IN:
 ----
 
 
+=== Early PRINT in Assembly
+
+`./docs/misc/arm/early-printk.txt`
+
+In earlier versions of Xen to enable "early printk"
+one could add `debug=y` to the command line
+`make build-xen XEN_TARGET_ARCH=tachy CROSS_COMPILE=tachy-linux-gnu- debug=y`.
+It is not the case anymore, you need to run `make -C xen menuconfig XEN_TARGET_ARCH=tachy`,
+select menu "Debugging Options" and check "Early printk" option.
+
+
+
 
 === Run Tachyum Linux kernel
 
